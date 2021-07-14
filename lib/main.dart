@@ -1,113 +1,318 @@
 import 'package:flutter/material.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  List<Container> containers = [
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.yellow,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.red,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.green,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.pink,
+    ),
+    Container(
+      margin: EdgeInsets.only(left: 0, right: 0),
+      height: 120,
+      color: Colors.cyan,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.orange,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.blue,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.grey,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.cyan,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.orange,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.blue,
+    ),
+    Container(
+      height: 120,
+      margin: EdgeInsets.only(left: 0, right: 0),
+      color: Colors.grey,
+    ),
+  ];
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  bool isVisible = false;
+  ScrollController _sc = ScrollController();
+  double _currentSliderValue = 0.4;
+
+  @override
+  void initState() {
+    super.initState();
+    _sc.addListener(() {
+      if (_sc.position.outOfRange && !isVisible) {}
     });
+  }
+
+  void close() {
+    if (containers.length == 13) {
+      containers.removeAt(0);
+    }
+  }
+
+  void open() {
+    if (containers.length < 13) {
+      containers.insert(
+        0,
+        Container(
+          height: 120,
+          margin: EdgeInsets.only(left: 0, right: 0),
+          color: Colors.grey,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      body: SlidingUpPanel(
+        maxHeight: MediaQuery.of(context).size.height,
+        minHeight: MediaQuery.of(context).size.height * 0.4,
+        body: _body(),
+        panelBuilder: (sc) => _panel(sc),
+        onPanelOpened: open,
+        onPanelClosed: close,
+        onPanelSlide: (double value) => setState(() {
+          setState(() {
+            _currentSliderValue = value;
+            print(_currentSliderValue);
+          });
+        }),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+    );
+  }
+
+  Widget _panel(ScrollController sc) {
+    _sc = sc;
+    return MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: Stack(children: [
+          listCustom(sc),
+          GestureDetector(
+            onTap: () => setState(() {
+              isVisible = !isVisible;
+              sc.animateTo(1200,
+                  duration: Duration(milliseconds: 300), curve: Curves.linear);
+            }),
+            child: Container(
+              child: Stack(
+                children: [
+                  AnimatedPositioned(
+                    curve: Curves.linear,
+                    bottom: 600 - (_currentSliderValue * 500),
+                    right: 20,
+                    height: isVisible ? 157 : 60,
+                    width: isVisible ? 157 : 60,
+                    duration: Duration(milliseconds: 300),
+                    child: AnimatedOpacity(
+                      opacity: isVisible ? 0 : 1,
+                      duration: Duration(milliseconds: 300),
+                      child: Container(
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                  AnimatedPositioned(
+                    curve: Curves.linear,
+                    bottom: 600 - (_currentSliderValue * 500),
+                    left:
+                        isVisible ? 20 : MediaQuery.of(context).size.width - 80,
+                    height: isVisible ? 157 : 60,
+                    width: isVisible ? 157 : 60,
+                    duration: Duration(milliseconds: 300),
+                    child: AnimatedOpacity(
+                      opacity: isVisible ? 0 : 1,
+                      duration: Duration(milliseconds: 300),
+                      child: Container(
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  AnimatedPositioned(
+                    curve: Curves.linear,
+                    bottom: 600 - (_currentSliderValue * 500),
+                    left:
+                        isVisible ? 20 : MediaQuery.of(context).size.width - 80,
+                    height: isVisible ? 157 : 60,
+                    width: isVisible ? 157 : 60,
+                    duration: Duration(milliseconds: 300),
+                    child: AnimatedOpacity(
+                      opacity: isVisible ? 0 : 1,
+                      duration: Duration(milliseconds: 300),
+                      child: Container(
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                  AnimatedPositioned(
+                    curve: Curves.linear,
+                    bottom: 600 - (_currentSliderValue * 500),
+                    right: 20,
+                    height: isVisible ? 157 : 60,
+                    width: isVisible ? 157 : 60,
+                    duration: Duration(milliseconds: 300),
+                    child: AnimatedOpacity(
+                      opacity: isVisible ? 0 : 1,
+                      duration: Duration(milliseconds: 300),
+                      child: Container(
+                        color: Colors.black,
+                        child: Text("4"),
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+          )
+        ]));
+  }
+
+  Widget _body() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          height: MediaQuery.of(context).size.height -
+              (MediaQuery.of(context).size.height *
+                  ((_currentSliderValue - 0.4) * 0.4)),
+          width: MediaQuery.of(context).size.width -
+              (MediaQuery.of(context).size.width *
+                  ((_currentSliderValue - 0.4) * 0.4)),
+          decoration: BoxDecoration(
+              color: Colors.blue,
+              border: Border.all(),
+              borderRadius: BorderRadius.all(Radius.circular(20))),
+        ),
+      ],
+    );
+  }
+
+  CustomScrollView listCustom(ScrollController sc) {
+    return CustomScrollView(controller: sc, slivers: [
+      SliverList(
+        delegate: SliverChildListDelegate(
+          [
+            Column(
+              children: containers,
+            ),
+            VisibilityDetector(
+              key: Key('my-widget-key'),
+              onVisibilityChanged: (visibilityInfo) {
+                var visiblePercentage = visibilityInfo.visibleFraction * 100;
+                if (visiblePercentage == 100 && !isVisible) {
+                  setState(() {
+                    isVisible = true;
+                  });
+                  sc.animateTo(sc.position.maxScrollExtent,
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.linear);
+                }
+              },
+              child: Container(
+                height: 120,
+                width: 50,
+                color: Colors.red,
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+      SliverPadding(
+        padding: EdgeInsets.only(left: 20, right: 20),
+        sliver: SliverVisibilityDetector(
+          key: Key("chave"),
+          onVisibilityChanged: (visibilityInfo) {
+            var visiblePercentage = visibilityInfo.visibleFraction * 100;
+            if (visiblePercentage == 0 && isVisible) {
+              setState(() {
+                isVisible = false;
+              });
+            }
+          },
+          sliver: Container(
+            child: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, mainAxisSpacing: 20, crossAxisSpacing: 20),
+              delegate: SliverChildListDelegate(
+                [
+                  Container(
+                    height: 120,
+                    width: 50,
+                    color: Colors.blue,
+                  ),
+                  Container(
+                    height: 120,
+                    width: 50,
+                    color: Colors.red,
+                  ),
+                  Container(
+                    height: 120,
+                    width: 50,
+                    color: Colors.green,
+                  ),
+                  Container(
+                    height: 120,
+                    width: 50,
+                    color: Colors.orange,
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]);
   }
 }
