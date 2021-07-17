@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:xxx_animation/slider.dart';
+import 'package:xxx_animation/slidingAppBar.dart';
 
 void main() => runApp(MyApp());
 
@@ -18,7 +19,8 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
   List<Container> containers = [
     Container(
       height: 120,
@@ -85,37 +87,56 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isVisible = false;
   ScrollController _sc = ScrollController();
   double _currentSliderValue = 0.4;
+  bool _visible = true;
+  late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 400),
+    );
     _sc.addListener(() {
       if (_sc.position.outOfRange && !isVisible) {}
     });
   }
 
   void close() {
+    setState(() => _visible = false);
     if (containers.length == 13) {
       containers.removeAt(0);
     }
   }
 
+  void showAppBar() {
+    setState(() => _visible = true);
+  }
+
   void open() {
-    if (containers.length < 13) {
-      containers.insert(
-        0,
-        Container(
-          height: 120,
-          margin: EdgeInsets.only(left: 0, right: 0),
-          color: Colors.grey,
-        ),
-      );
-    }
+    setState(() => _visible = false);
+
+    // containers.insert(
+    //   0,
+    //   Container(
+    //     height: 120,
+    //     margin: EdgeInsets.only(left: 0, right: 0),
+    //     color: Colors.grey,
+    //   ),
+    // );
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: SlidingAppBar(
+          child: AppBar(
+            title: Text('Search'),
+            toolbarHeight: _visible ? 80 : 0,
+          ),
+          controller: _controller,
+          visible: _visible),
       body: SlidingUpPanel(
         maxHeight: MediaQuery.of(context).size.height,
         minHeight: MediaQuery.of(context).size.height * 0.4,
@@ -123,9 +144,14 @@ class _MyHomePageState extends State<MyHomePage> {
         panelBuilder: (sc) => _panel(sc),
         onPanelOpened: open,
         onPanelClosed: close,
+        onPanelSnapPoint: showAppBar,
+        snapPoint: 0.8,
         onPanelSlide: (double value) => setState(() {
           setState(() {
             _currentSliderValue = value;
+            // if (value > 0.79 && value < 0.82) {
+            //   print("show app bar");
+            // }
             print(_currentSliderValue);
           });
         }),

@@ -1,189 +1,82 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
-void main() {
-  runApp(MyApp());
+void main() => runApp((MyApp()));
+
+class SlidingAppBar extends PreferredSize {
+  SlidingAppBar({
+    required this.child,
+    required this.controller,
+    required this.visible,
+  }) : super(
+            preferredSize: Size(0, 0),
+            child: Container(
+              width: 100,
+              color: Colors.pink,
+              height: 200,
+            ));
+
+  @override
+  final PreferredSizeWidget child;
+
+  @override
+  Size get preferredSize => child.preferredSize;
+
+  final AnimationController controller;
+  final bool visible;
+
+  @override
+  Widget build(BuildContext context) {
+    visible ? controller.reverse() : controller.forward();
+    return SlideTransition(
+      position: Tween<Offset>(begin: Offset.zero, end: Offset(0, -1)).animate(
+        CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn),
+      ),
+      child: child,
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
+class MyPage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyPageState createState() => _MyPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  bool isVisible = false;
-  ScrollController _sc = ScrollController();
+class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
+  bool _visible = true;
+  late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _sc.addListener(() {
-      if (_sc.position.outOfRange && !isVisible) {}
-    });
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 400),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
+      // extendBodyBehindAppBar: !_visible, // Uses entire screen after hiding AppBar
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text(_visible ? 'Hide' : 'Show'),
+        onPressed: () => setState(() => _visible = !_visible),
       ),
-      body: Stack(
-        children: [
-          CustomScrollView(controller: _sc, slivers: [
-            SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  bodyWidget(Colors.blue),
-                  bodyWidget(Colors.red),
-                  bodyWidget(Colors.green),
-                  bodyWidget(Colors.orange),
-                  bodyWidget(Colors.blue),
-                  VisibilityDetector(
-                    key: Key('my-widget-key'),
-                    onVisibilityChanged: (visibilityInfo) {
-                      var visiblePercentage =
-                          visibilityInfo.visibleFraction * 100;
-                      if (visiblePercentage == 100 && !isVisible) {
-                        setState(() {
-                          isVisible = true;
-                        });
-                        _sc.animateTo(_sc.position.maxScrollExtent,
-                            duration: Duration(milliseconds: 300),
-                            curve: Curves.linear);
-                      }
-                    },
-                    child: bodyWidget(Colors.red),
-                  ),
-                ],
-              ),
-            ),
-            SliverPadding(
-              padding: EdgeInsets.only(left: 20, right: 20),
-              sliver: SliverVisibilityDetector(
-                key: Key("chave"),
-                onVisibilityChanged: (visibilityInfo) {
-                  var visiblePercentage = visibilityInfo.visibleFraction * 100;
-                  if (visiblePercentage == 0 && isVisible) {
-                    setState(() {
-                      isVisible = false;
-                    });
-                  }
-                },
-                sliver: Container(
-                  child: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 20,
-                        crossAxisSpacing: 20),
-                    delegate: SliverChildListDelegate(
-                      [
-                        bodyWidget(Colors.blue),
-                        bodyWidget(Colors.red),
-                        bodyWidget(Colors.green),
-                        bodyWidget(Colors.orange),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ]),
-          AnimatedPositioned(
-            curve: Curves.linear,
-            bottom: isVisible ? 178 : 200,
-            left: isVisible ? 20 : MediaQuery.of(context).size.width - 80,
-            right: isVisible ? null : 20,
-            height: isVisible ? 157 : 60,
-            width: isVisible ? 157 : 60,
-            duration: Duration(milliseconds: 300),
-            child: AnimatedOpacity(
-              opacity: isVisible ? 0 : 1,
-              duration: Duration(milliseconds: 300),
-              child: Container(
-                color: Colors.blue,
-              ),
-            ),
-          ),
-          AnimatedPositioned(
-            curve: Curves.linear,
-            bottom: isVisible ? 178 : 200,
-            right: 20,
-            height: isVisible ? 157 : 60,
-            width: isVisible ? 157 : 60,
-            duration: Duration(milliseconds: 300),
-            child: AnimatedOpacity(
-              opacity: isVisible ? 0 : 1,
-              duration: Duration(milliseconds: 300),
-              child: Container(
-                color: Colors.red,
-              ),
-            ),
-          ),
-          AnimatedPositioned(
-            curve: Curves.linear,
-            bottom: isVisible ? 0 : 200,
-            left: isVisible ? 20 : MediaQuery.of(context).size.width - 80,
-            height: isVisible ? 157 : 60,
-            width: isVisible ? 157 : 60,
-            duration: Duration(milliseconds: 300),
-            child: AnimatedOpacity(
-              opacity: isVisible ? 0 : 1,
-              duration: Duration(milliseconds: 300),
-              child: Container(
-                color: Colors.green,
-              ),
-            ),
-          ),
-          AnimatedPositioned(
-            curve: Curves.linear,
-            bottom: isVisible ? 0 : 200,
-            right: 20,
-            height: isVisible ? 157 : 60,
-            width: isVisible ? 157 : 60,
-            duration: Duration(milliseconds: 300),
-            child: AnimatedOpacity(
-              opacity: isVisible ? 0 : 1,
-              duration: Duration(milliseconds: 300),
-              child: Container(
-                color: Colors.orange,
-                child: Text("4"),
-              ),
-            ),
-          )
-        ],
+      appBar: SlidingAppBar(
+        controller: _controller,
+        visible: _visible,
+        child: AppBar(title: Text('AppBar')),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            isVisible = !isVisible;
-          });
-        },
-      ),
-    );
-  }
-
-  Widget bodyWidget(Color color) {
-    return Container(
-      height: 120,
-      color: color,
     );
   }
 }
