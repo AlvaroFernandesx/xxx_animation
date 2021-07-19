@@ -87,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage>
   bool isVisible = false;
   ScrollController _sc = ScrollController();
   double _currentSliderValue = 0.4;
-  bool _visible = true;
+  bool _visible = false;
   late AnimationController _controller;
 
   @override
@@ -129,32 +129,34 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: SlidingAppBar(
-          child: AppBar(
-            title: Text('Search'),
-            toolbarHeight: _visible ? 80 : 0,
-          ),
-          controller: _controller,
-          visible: _visible),
-      body: SlidingUpPanel(
-        maxHeight: MediaQuery.of(context).size.height,
-        minHeight: MediaQuery.of(context).size.height * 0.4,
-        body: _body(),
-        panelBuilder: (sc) => _panel(sc),
-        onPanelOpened: open,
-        onPanelClosed: close,
-        onPanelSnapPoint: showAppBar,
-        snapPoint: 0.8,
-        onPanelSlide: (double value) => setState(() {
-          setState(() {
-            _currentSliderValue = value;
-            // if (value > 0.79 && value < 0.82) {
-            //   print("show app bar");
-            // }
-            print(_currentSliderValue);
-          });
-        }),
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: Scaffold(
+        appBar: SlidingAppBar(
+            child: AppBar(
+              title: Text('Search'),
+              toolbarHeight: _visible ? 110 : 0,
+            ),
+            controller: _controller,
+            visible: _visible),
+        body: SlidingUpPanel(
+          padding: EdgeInsets.zero,
+          maxHeight: MediaQuery.of(context).size.height,
+          minHeight: MediaQuery.of(context).size.height * 0.4,
+          body: _body(),
+          panelBuilder: (sc) => _panel(sc),
+          onPanelOpened: open,
+          onPanelClosed: close,
+          onPanelSnapPoint: showAppBar,
+          snapPoint: 0.8,
+          onPanelSlide: (double value) => setState(() {
+            setState(() {
+              _currentSliderValue = value;
+              print(_currentSliderValue);
+            });
+          }),
+        ),
       ),
     );
   }
@@ -265,6 +267,25 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Page2(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        var begin = Offset(0.5, 1.0);
+        var end = Offset.zero;
+        var curve = Curves.ease;
+
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
+
   CustomScrollView listCustom(ScrollController sc) {
     return CustomScrollView(controller: sc, slivers: [
       SliverList(
@@ -313,10 +334,13 @@ class _MyHomePageState extends State<MyHomePage>
                   crossAxisCount: 2, mainAxisSpacing: 20, crossAxisSpacing: 20),
               delegate: SliverChildListDelegate(
                 [
-                  Container(
-                    height: 120,
-                    width: 50,
-                    color: Colors.blue,
+                  GestureDetector(
+                    onTap: () => (Navigator.of(context).push(_createRoute())),
+                    child: Container(
+                      height: 120,
+                      width: 50,
+                      color: Colors.pink,
+                    ),
                   ),
                   Container(
                     height: 120,
@@ -340,5 +364,17 @@ class _MyHomePageState extends State<MyHomePage>
         ),
       ),
     ]);
+  }
+}
+
+class Page2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Text('Page 2'),
+      ),
+    );
   }
 }
